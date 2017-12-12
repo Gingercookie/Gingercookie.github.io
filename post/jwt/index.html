@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='JOSE and JWT TL;DR - JWT is bad for sessions; okay for one-time use auth.
+Let&rsquo;s start off with a couple of definitions - JOSE - Javascript Object Signing and Encryption - JWT - JSON Web Token - JWS - JSON Web Signatures - JWE - JSON Web Encryption
+Most people are complaining about the use of JWTs, but let&rsquo;s be clear. JWTs are a type of JOSE, since they are Javascript Objects (JSON).'>
+
+<meta property='og:title' content='JWT vulnerabilities • Home of the American Jinja Warrior'>
+<meta property='og:description' content='JOSE and JWT TL;DR - JWT is bad for sessions; okay for one-time use auth.
+Let&rsquo;s start off with a couple of definitions - JOSE - Javascript Object Signing and Encryption - JWT - JSON Web Token - JWS - JSON Web Signatures - JWE - JSON Web Encryption
+Most people are complaining about the use of JWTs, but let&rsquo;s be clear. JWTs are a type of JOSE, since they are Javascript Objects (JSON).'>
+<meta property='og:url' content='http://www.americanjinjawarrior.com/post/jwt/'>
+<meta property='og:site_name' content='Home of the American Jinja Warrior'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content=''><meta property='article:published_time' content='2017-12-12T15:50:44-07:00'/><meta property='article:modified_time' content='2017-12-12T15:50:44-07:00'/><meta name='twitter:card' content='summary'>
+
+<meta name="generator" content="Hugo 0.31.1" />
+
+  <title>JWT vulnerabilities • Home of the American Jinja Warrior</title>
+  <link rel='canonical' href='http://www.americanjinjawarrior.com/post/jwt/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu:400,400i,700&subset=latin'>
+<link rel='stylesheet' href='/assets/css/main.2a477d80.css'><link rel='stylesheet' href='/css/custom.css'>
+</head>
+
+
+<body class='page type-post'>
+  <div class='site'>
+
+    <a class='screen-reader' href='#main'>Skip to Content</a>
+
+    <header id='header' class='header-container'>
+      <div class='header site-header'>
+        <nav id='main-menu' class='main-menu-container' aria-label='Main Menu'>
+  <ul class='main-menu'>
+  <li>
+      <a href='/notes/'>Notes</a>
+    </li>
+  <li>
+      <a href='https://github.com/Gingercookie'>Repo</a>
+    </li>
+  <li>
+      <a href='http://www.americanjinjawarrior.com/'>Home</a>
+    </li>
+  
+  </ul>
+</nav>
+
+        <div class='header-info'>
+          
+          <p class='site-title title'>Home of the American Jinja Warrior</p>
+          
+          <p class='site-description subtitle'>Personal blog for Jinja</p>
+        </div>
+      </div>
+    </header>
+
+
+<main id='main' class='main'>
+  <article lang='en' class='entry'>
+    <header class='header-container'>
+  <div class='header entry-header'>
+    <div class='header-info'>
+      <h1 class='title'>JWT vulnerabilities</h1>
+      
+
+    </div>
+    
+<div class='meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader'>Posted on </span>
+  <time class='date' datetime='2017-12-12T15:50:44-07:00'>2017, Dec 12</time>
+</span>
+
+  
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+3 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+    
+    
+
+    <div class='entry-content'>
+  
+
+<h2 id="jose-and-jwt">JOSE and JWT</h2>
+
+<p><em>TL;DR - JWT is bad for sessions; okay for one-time use auth.</em></p>
+
+<p>Let&rsquo;s start off with a couple of definitions
+- <em>JOSE - Javascript Object Signing and Encryption</em>
+- <em>JWT - JSON Web Token</em>
+- <em>JWS - JSON Web Signatures</em>
+- <em>JWE - JSON Web Encryption</em></p>
+
+<p>Most people are complaining about the use of JWTs, but let&rsquo;s be clear. JWTs are
+a <em>type</em> of JOSE, since they are Javascript Objects (JSON).</p>
+
+<h4 id="forging-tokens-round-1">Forging Tokens (round 1)</h4>
+
+<p>Part of the RFC defines a &ldquo;none&rdquo; algorithm to be used for an <em>unsecured JWS</em>.
+An unsecured JWS should only be used in a scenario where integrity protection
+is not required. Implementations should not accept unsecured JWSs by default
+as valid.
+Unfortunately, the &ldquo;none&rdquo; algorithm is one of two algorithms that is considered
+mandatory to implement - the other algorithm is HS256 (this is a symmetric key
+scheme, and will be important in a minute).</p>
+
+<p><em>However</em>, some JWT libraries treat JWT&rsquo;s with the alg set to &ldquo;none&rdquo; as a valid
+token without actually verifying anything. This allows an attacker to forge
+a JWT, with <code>&quot;alg&quot;: &quot;none&quot;</code> and <code>signature = &quot;&quot;</code>, and the implementation may
+treat it as a valid token.</p>
+
+<p><em>How to mitigate</em></p>
+
+<ul>
+<li>Explicitly check for and deny tokens with the &ldquo;none&rdquo; algorithm set. This may
+have to be outside of your JWT library.</li>
+<li>If you expect a signed token (you should), attempt to verify the token like
+normal. If it fails verification (because there is no signed part of the
+token), throw away the token.</li>
+</ul>
+
+<h4 id="forging-tokens-round-2">Forging Tokens (round 2)</h4>
+
+<p>Conveniently, the JWT spec has allowed us to use either symmetric or asymmetric
+keys to sign our tokens. Also conveniently for hackers, they have allowed us
+to specify the signing algorithm with the &ldquo;alg&rdquo; claim.
+For asymmetric schemes, the private key is used to sign and the public key to
+verify. For symmetric schemes, the same key is used for both.</p>
+
+<p>Now, imagine a scenario where a token-issuing server creates and signs tokens
+with a set of asymmetric keys. Because we are required by the RFC to implement
+HS256 (same key signs and verifies). The attacker can then forge a token and
+use the server&rsquo;s public key to sign it, but claim that the algorithm used to
+sign was HS256. That shouldn&rsquo;t work right ? But here&rsquo;s the catch&hellip;</p>
+
+<p><em>If a server is expecting an RSA signed token, but actually receives
+an HMAC&rsquo;ed token, it will think the public key is actually the HMAC secret key.</em></p>
+
+<p>Thus, the default implementation of RSA JWTs is vulnerable to token forgery.</p>
+
+<p><em>How to mitigate</em></p>
+
+<p>The server should know what kind of signature to expect (and thus which key to
+use to verify the token). The <code>verify(...)</code> method of your JWT library should
+include an argument to specify what kind of algorithm was expected. If the
+algorithm doesn&rsquo;t match what you expect, throw away the token.</p>
+
+<p>If your library doesn&rsquo;t support this, then you can decode and verify that the
+&ldquo;alg&rdquo; claim in the token is what you expect before you verify, and trust, the
+token.</p>
+
+<p>If you need to use multiple keys (for compatibility), use a separate key for
+each algorithm, and set the &ldquo;key ID&rdquo; field appropriately. You can then decode
+and check both the &ldquo;algorithm&rdquo; and &ldquo;keyid&rdquo; claims to make sure they are what
+you expected.</p>
+
+<h4 id="insecurity-of-jwe-algorithms">Insecurity of JWE Algorithms</h4>
+
+<ul>
+<li><p>RSA with PKCS #1v1.5 Padding</p>
+
+<p>This has been vulnerable since 1998.</p></li>
+
+<li><p>RSA with OAEP Padding</p>
+
+<p>Likely secure, but does not have a complete mathematical proof.</p></li>
+
+<li><p>ECDH-ES</p>
+
+<p>Vulnerable to invalid curve attacks. This could be mitigated trough the
+use of secure elliptic curves, but would become non-compliant with the RFC.</p></li>
+
+<li><p>AES-GCM</p>
+
+<p>There are plenty of related vulnerabilities here.</p></li>
+</ul>
+
+</div>
+
+    
+<footer class='entry-footer-container'>
+  <div class='entry-footer'>
+  <div class='categories'>
+  <span class='taxonomyTerm-icon'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M22,19a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V5A2,2,0,0,1,4,3H9l2,3h9a2,2,0,0,1,2,2Z"/>
+  
+</svg>
+</span>
+  <span class='screen-reader'>Categories: </span><a class='category' href='/categories/'>Categories</a></div>
+<div class='tags'>
+  <span class='taxonomyTerm-icon'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M20.59,13.41l-7.17,7.17a2,2,0,0,1-2.83,0L2,12V2H12l8.59,8.59A2,2,0,0,1,20.59,13.41Z"/>
+  <line x1="7" y1="7" x2="7" y2="7"/>
+  
+</svg>
+</span>
+  <span class='screen-reader'>Tags: </span><a class='tag' href='/tags/'>Tags</a></div>
+
+  </div>
+</footer>
+
+
+  </article>
+  
+  
+</main>
+
+    <footer id='footer' class='footer-container'>
+      <div class='footer'>
+        <div class='social-menu-container'>
+  <nav aria-label='Social Menu'>
+    <ul class='social-menu'><li>
+        <a href='https://github.com/Gingercookie' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/WillieJoeJones' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:will.gingerbox@gmail.com' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</div>
+        <div class='copyright'>
+  <p>
+        
+      
+
+       &copy; 2017 Theme by MunifTanjim 
+  </p>
+</div>
+
+      </div>
+    </footer>
+
+  </div><script src='/assets/js/main.5871befd.js'></script><script src='/js/custom.js'></script></body>
+
+</html>
+

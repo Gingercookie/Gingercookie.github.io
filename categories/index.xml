@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home of the American Jinja Warrior</title>
+    <link>http://www.americanjinjawarrior.com/categories/</link>
+    <description>Recent content on Home of the American Jinja Warrior</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Tue, 12 Dec 2017 15:50:44 -0700</lastBuildDate>
+    
+	<atom:link href="http://www.americanjinjawarrior.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>JWT vulnerabilities</title>
+      <link>http://www.americanjinjawarrior.com/post/jwt/</link>
+      <pubDate>Tue, 12 Dec 2017 15:50:44 -0700</pubDate>
+      
+      <guid>http://www.americanjinjawarrior.com/post/jwt/</guid>
+      <description>JOSE and JWT TL;DR - JWT is bad for sessions; okay for one-time use auth.
+Let&amp;rsquo;s start off with a couple of definitions - JOSE - Javascript Object Signing and Encryption - JWT - JSON Web Token - JWS - JSON Web Signatures - JWE - JSON Web Encryption
+Most people are complaining about the use of JWTs, but let&amp;rsquo;s be clear. JWTs are a type of JOSE, since they are Javascript Objects (JSON).</description>
+    </item>
+    
+  </channel>
+</rss>

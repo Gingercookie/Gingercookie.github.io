@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Home of the American Jinja Warrior</title>
+    <link>http://www.americanjinjawarrior.com/tags/</link>
+    <description>Recent content in Tags on Home of the American Jinja Warrior</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <lastBuildDate>Tue, 12 Dec 2017 15:50:44 -0700</lastBuildDate>
+    
+	<atom:link href="http://www.americanjinjawarrior.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>http://www.americanjinjawarrior.com/tags/</link>
+      <pubDate>Tue, 12 Dec 2017 15:50:44 -0700</pubDate>
+      
+      <guid>http://www.americanjinjawarrior.com/tags/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
