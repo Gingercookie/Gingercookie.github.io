@@ -1,4 +1,4 @@
-baseURL = "http://www.americanjinjawarrior.com"
+baseURL = "http://americanjinjawarrior.com"
 title = "Home of the American Jinja Warrior"
 # for smart copyright line, leave this blank and check [params.copyright]
 copyright = ""
@@ -80,7 +80,7 @@ page = "/:slug/"
     name = "Home"
     weight = 0
     identifier = "home"
-    url = "http://www.americanjinjawarrior.com/"
+    url = "http://americanjinjawarrior.com/"
 
 [[menu.main]]
     name = "Repo"
@@ -91,7 +91,7 @@ page = "/:slug/"
 [[menu.main]]
     name = "Notes"
     weight = 4
-    url = "/notes/"
+    url = "/post/"
 
 [blackfriday]
 hrefTargetBlank = true
